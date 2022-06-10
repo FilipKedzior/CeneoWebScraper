@@ -1,12 +1,8 @@
 from app import app
 from flask import render_template, redirect, url_for, request
-import requests
 import json
-from bs4 import BeautifulSoup
 import os
-import pandas as pd
-import numpy as np
-from matplotlib import pyplot as plt
+from app.models.product import Product
 
 def get_item(ancestor, selector, attribute=None, return_list=False):
     try:
@@ -39,6 +35,14 @@ def index():
 def extract():
     if request.method == "POST":
         product_id = request.form.get("product_id")
+        product = Product(product_id)
+        product.extract_name()
+        product.extract_opinions()
+        if product.product_name:
+            product.extract_opinions
+        else:
+            pass
+        
         url = f"https://www.ceneo.pl/{product_id}#tab=reviews"
         all_opinions = []
         while(url):
@@ -76,35 +80,5 @@ def author():
 
 @app.route('/product/<product_id>')
 def product(product_id):
-    opinions = pd.read_json(f"opinions/{product_id}.json")
-    opinions["stars"] = opinions["stars"].map(lambda x: float(x.split("/")[0].replace(",", ".")))
-    stats = {
-        "opinions_count": len(opinions),
-        "pros_count": opinions["pros"].map(bool).sum(),
-        "cons_count": opinions["cons"].map(bool).sum(),
-        "average_score": opinions["stars"].mean().round(2)
-    }
-    if not os.path.exists("app/plots"):
-           os.makedirs("app/plots")
-    recommendation = opinions["recommendation"].value_counts(dropna=False).sort_index().reindex(["Nie polecam", "Polecam", None], fill_value=0)
-    recommendation.plot.pie(
-        label="",
-        autopct = lambda p: '{:.1f}%'.format(round(p)) if p > 0 else '',
-        colors = ["crimson", "forestgreen", "lightskyblue"],
-        labels = ["Nie polecam", "Polecam", "Nie mam zdania"]
-    )
-    plt.title("Rekomendacje")
-    plt.savefig(f"app/plots/{product_id}_recommendations.png")
-    plt.close()
-    stars = opinions["stars"].value_counts().sort_index().reindex(list(np.arange(0,5.5,0.5)), fill_value=0)
-    stars.plot.bar(
-        color = "pink"
-    )
-    plt.title("Oceny produktu")
-    plt.xlabel("Liczba gwiazdek")
-    plt.ylabel("Liczba opinii")
-    plt.grid(True, axis="y")
-    plt.xticks(rotation=0)
-    plt.savefig(f"app/plots/{product_id}_stars.png")
-    plt.close()
+    
     return render_template("product.html.jinja", product_id=product_id, stats=stats, opinions=opinions)
