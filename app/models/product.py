@@ -82,32 +82,30 @@ class Product():
         plt.close()
         return self
 
-    def __str__(self, product_id, opinions, product_name, opinions_count, pros_count, cons_count, average_score) -> str:
-        self.product_id = product_id
-        self.product_name = product_name
-        self.opinions = opinions
-        self.opinions_count = opinions_count
-        self.pros_count = pros_count
-        self.cons_count = cons_count
-        self.average_score = average_score
-        return self
         
+    def __str__(self):
+        return f"""product_id: {self.product_id}<br>
+        product_name: {self.product_name}<br>
+        opinions_count: {self.opinions_count}<br>
+        pros_count: {self.pros_count}<br>
+        cons_count: {self.cons_count}<br>
+        average_score: {self.average_score}<br>
+        opinions: <br><br>
+        """ + "<br><br>".join(str(opinion) for opinion in self.opinions)
 
-    def __repr__(self) -> str:
-        pass
+    def __repr__(self):
+        return f"Product(product_id={self.product_id}, product_name={self.product_name}, opinions_count={self.opinions_count}, pros_count={self.pros_count}, cons_count={self.cons_count}, average_score={self.average_score}, opinions: [" + ", ".join(opinion.__repr__() for opinion in self.opinions) + "])"
 
-    def to_dict(self) -> dict:
-        # >>> class A(object):
-        # ...   def __init__(self):
-        # ...     self.b = 1
-        # ...     self.c = 2
-        # ...   def do_nothing(self):
-        # ...     pass
-        # ...
-        # >>> a = A()
-        # >>> a.__dict__
-        # {'c': 2, 'b': 1}
-        pass
+    def to_dict(self):
+        return {
+            "product_id": self.product_id,
+            "product_name": self.product_name,
+            "opinions_count": self.opinions_count,
+            "pros_count": self.pros_count,
+            "cons_count": self.cons_count,
+            "average_score": self.average_score,
+            "opinions": [opinion.to_dict() for opinion in self.opinions]
+        }
 
     def export_opinions(self):
         if not os.path.exists("app/opinions"):
